@@ -1,5 +1,5 @@
 import "./config/validateEnvs";
-import { env } from "./config/env";
+import { env } from "./config/validateEnvs";
 import app from "./app";
 import logger from "./utils/logger";
 

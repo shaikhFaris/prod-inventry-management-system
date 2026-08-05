@@ -1,13 +1,22 @@
 import express, { type Express } from "express";
 import morgan from "morgan";
+import cors from "cors";
+import CookieParser from "cookie-parser";
+import { handleGlobalError } from "./middleware/global-error";
+import { ApiError } from "./utils/ApiError";
+import { handle404 } from "./middleware/not-found-handler";
+import { v1Routes } from "./routes/v1";
 
 const app: Express = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(CookieParser());
 
-app.get("/", (req, res) => {
-  res.json("Hello");
-});
+app.use("/api/v1", v1Routes);
+
+app.use(handle404);
+app.use(handleGlobalError);
 
 export default app;
