@@ -1,6 +1,8 @@
 [ X ] initial setup with logging and env validation
-[ ] setting up controller, middlewares and services
+[ X ] setting up controller, middlewares and services
+[ X ] complete auth flow - refresh route and logout
 [ ] prevent timing attack
+[ ] prevent CRSF attacks
 [ ] connect db function before server starts
 [ ] Write proper cors config
 [ ] Need to add proper rate limitng
