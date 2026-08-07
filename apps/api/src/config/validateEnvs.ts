@@ -8,6 +8,11 @@ const envSchema = z.object({
   NODE_ENV: z.literal(["dev", "prod"]),
   PORT: z.coerce.number(),
   DB_URL: z.url(),
+  JWT_ACCESS_TOKEN_SECRET: z.string(),
+  JWT_ACCESS_TOKEN_TIME_IN_MS: z.coerce.number(),
+  JWT_REFRESH_TOKEN_SECRET: z.string(),
+  JWT_REFRESH_TOKEN_TIME_IN_MS: z.coerce.number(),
+  COOKIE_DOMAIN: z.string(),
 });
 
 const res = envSchema.safeParse(process.env);
