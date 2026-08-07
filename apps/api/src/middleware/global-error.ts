@@ -3,6 +3,11 @@ import { ApiError } from "../utils/ApiError";
 import logger from "../utils/logger";
 
 export const handleGlobalError: ErrorRequestHandler = (err, req, res, next) => {
+  if (err instanceof SyntaxError && "body" in err && err.message.includes("JSON")) {
+    return res.status(400).json({
+      error: "Invalid JSON payload",
+    });
+  }
   if (err instanceof ApiError) {
     logger.error(`${err.status} error | ${err.message}\n ${err.stack}`);
     return res.status(err.status).json({
