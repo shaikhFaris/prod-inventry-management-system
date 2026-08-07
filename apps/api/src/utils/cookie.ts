@@ -1,7 +1,7 @@
 import type { CookieOptions, Response } from "express";
 import { env } from "../config/validateEnvs";
 
-const cookieOptions: CookieOptions = {
+export const cookieOptions: CookieOptions = {
   secure: true,
   sameSite: "lax", //important
   domain: env.COOKIE_DOMAIN,

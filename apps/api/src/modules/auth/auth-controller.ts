@@ -1,9 +1,11 @@
 import { type RequestHandler } from "express";
 import type z from "zod";
 import type { loginSchema, signUpSchema } from "./auth-schema";
-import { logIn, signIn } from "./auth-services";
+import { logIn, logout, refresh, signIn } from "./auth-services";
 import logger from "../../utils/logger";
-import { clearAllCookies, setAllCookies } from "../../utils/cookie";
+import { clearAllCookies, cookieOptions, setAllCookies } from "../../utils/cookie";
+import { ApiError } from "../../utils/ApiError";
+import { env } from "../../config/validateEnvs";
 
 type SignUpBody = z.infer<typeof signUpSchema>;
 type LoginBody = z.infer<typeof loginSchema>;
@@ -32,4 +34,34 @@ export const handleLogin: RequestHandler = async (req, res) => {
   setAllCookies(res, accessToken, refreshToken);
 
   res.status(200).json(accountInfo);
+};
+
+export const handleLogout: RequestHandler = async (req, res) => {
+  if (!req.refreshToken) throw new ApiError(401, "Invalid tokens. Login first.");
+
+  await logout(req.refreshToken);
+
+  clearAllCookies(res);
+
+  res.status(204).json({
+    message: "Logged out.",
+  });
+};
+
+export const handleRefresh: RequestHandler = async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) throw new ApiError(401, "Invalid tokens.");
+
+  const { accessToken } = await refresh(refreshToken);
+
+  res.clearCookie("accessToken");
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    maxAge: env.JWT_ACCESS_TOKEN_TIME_IN_MS,
+    ...cookieOptions,
+  });
+  res.json({
+    message: "Access token renewed.",
+  });
 };
