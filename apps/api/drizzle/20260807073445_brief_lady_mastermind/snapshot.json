@@ -1,0 +1,161 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "e2a27b8d-0895-4787-9935-69b2cac02866",
+  "prevIds": [
+    "75d68c69-194e-487a-aa69-71d5e778bd67"
+  ],
+  "ddl": [
+    {
+      "values": [
+        "admin",
+        "customer"
+      ],
+      "name": "role",
+      "entityType": "enums",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "refresh_token",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "users",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "refresh_token",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "refresh_token"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "refresh_token"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "password",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'customer'",
+      "generated": null,
+      "identity": null,
+      "name": "role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "users"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "refresh_token_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "refresh_token"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "users_pkey",
+      "schema": "public",
+      "table": "users",
+      "entityType": "pks"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
+        "email"
+      ],
+      "nullsNotDistinct": false,
+      "name": "users_email_key",
+      "schema": "public",
+      "table": "users",
+      "entityType": "uniques"
+    }
+  ],
+  "renames": []
+}
