@@ -7,6 +7,7 @@ import {
   handleDeleteProduct,
   handleGetAllProducts,
   handleGetProductDetails,
+  handleGetProductStock,
   handleUpdateProduct,
 } from "./product-controller";
 
@@ -31,5 +32,7 @@ productRoutes.patch(
 );
 
 productRoutes.delete("/:id", handleDeleteProduct);
+
+productRoutes.get("/:id/stock", handleGetProductStock);
 
 export { productRoutes };

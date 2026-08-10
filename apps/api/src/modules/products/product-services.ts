@@ -42,3 +42,9 @@ export const deleteProduct = async (productId: string) => {
   const product = await deleteProductById(productId);
   if (!product) throw new ApiError(404, "Product not found");
 };
+
+export const productStock = async (productId: string) => {
+  const product = await findProductById(productId);
+  if (!product) throw new ApiError(404, "Product not found");
+  return product.stock;
+};

@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getProductDetails,
   getProducts,
+  productStock,
   updateProduct,
 } from "./product-services";
 import {
@@ -23,7 +24,7 @@ export const handleCreateProduct: RequestHandler = async (req, res) => {
   const { body } = req as CreateProductBody;
   const product = await createProduct(body);
 
-  res.json(product);
+  res.status(201).json(product);
 };
 
 export const handleGetAllProducts: RequestHandler = async (req, res) => {
@@ -73,4 +74,15 @@ export const handleDeleteProduct: RequestHandler = async (req, res) => {
   }
   await deleteProduct(valid.data);
   return res.status(204).json();
+};
+
+export const handleGetProductStock: RequestHandler = async (req, res) => {
+  const valid = z.uuid().safeParse(req.params.id);
+
+  if (!valid.success) {
+    throw new ApiError(400, "Invalid product ID");
+  }
+  const stock = await productStock(valid.data);
+
+  return res.json({ stock });
 };
