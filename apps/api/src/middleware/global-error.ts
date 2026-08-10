@@ -9,7 +9,7 @@ export const handleGlobalError: ErrorRequestHandler = (err, req, res, next) => {
     });
   }
   if (err instanceof ApiError) {
-    logger.error(`${err.status} error | ${err.message}\n ${err.stack}`);
+    logger.error(`${err.status} error | ${err.message} | ${err.debugMsg}\n ${err.stack}`);
     return res.status(err.status).json({
       error: err.message,
     });
