@@ -21,6 +21,12 @@ export const updateProductSchema = z.object({
     }),
 });
 
+export const updateStockSchema = z.object({
+  body: z.strictObject({
+    adjustment: z.number().refine((v) => v !== 0, "Adjustment cannot be zero"),
+  }),
+});
+
 export const getAllProductsParamsSchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(10),
