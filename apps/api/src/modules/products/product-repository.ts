@@ -1,7 +1,9 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, type EmptyRelations } from "drizzle-orm";
 import { db } from "../../db/drizzle";
 import { products } from "../../db/schema/schema";
 import type { UpdateProductBody } from "./product-controller";
+import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
+import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 
 export const insertProduct = async ({
   stock,
@@ -54,4 +56,29 @@ export const updateProductById = async (
 
 export const deleteProductById = async (productId: string) => {
   return (await db.delete(products).where(eq(products.id, productId)).returning())[0];
+};
+
+export const findProductByIdLock = async (
+  productId: string,
+  tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  return (
+    await tx.select().from(products).where(eq(products.id, productId)).for("update")
+  )[0];
+};
+
+export const updateProductStockById = async (
+  productId: string,
+  stock: number,
+  tx?: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  const pool = tx ?? db;
+  return await pool
+    .update(products)
+    .set({
+      stock,
+      updatedAt: new Date(),
+    })
+    .where(eq(products.id, productId))
+    .returning();
 };

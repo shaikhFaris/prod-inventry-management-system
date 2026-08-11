@@ -1,11 +1,14 @@
+import { db } from "../../db/drizzle";
 import { ApiError } from "../../utils/ApiError";
 import type { UpdateProductBody } from "./product-controller";
 import {
   deleteProductById,
   findAllProducts,
   findProductById,
+  findProductByIdLock,
   insertProduct,
   updateProductById,
+  updateProductStockById,
 } from "./product-repository";
 
 export const createProduct = async (product: {
@@ -41,4 +44,26 @@ export const updateProduct = async (
 export const deleteProduct = async (productId: string) => {
   const product = await deleteProductById(productId);
   if (!product) throw new ApiError(404, "Product not found");
+};
+
+export const productStock = async (productId: string) => {
+  const product = await findProductById(productId);
+  if (!product) throw new ApiError(404, "Product not found");
+  return product.stock;
+};
+
+export const updateProductStock = async (productId: string, adjustment: number) => {
+  return await db.transaction(async (tx) => {
+    const product = await findProductByIdLock(productId, tx);
+
+    if (!product) throw new ApiError(404, "Product not found");
+
+    const stock = product.stock;
+    const updatedStock = stock + adjustment;
+
+    if (updatedStock < 0)
+      throw new ApiError(409, `Adjustment not possible. Stock: ${stock}`);
+
+    return await updateProductStockById(productId, updatedStock, tx);
+  });
 };
