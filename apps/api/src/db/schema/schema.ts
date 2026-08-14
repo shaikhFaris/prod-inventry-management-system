@@ -11,6 +11,8 @@ import {
 
 export const roleEnum = pgEnum("role", ["admin", "customer"]);
 
+export const orderStatusEnum = pgEnum("status", ["processing", "delivered", "cancelled"]);
+
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar({ length: 255 }).notNull().unique(),
@@ -43,5 +45,35 @@ export const products = pgTable("products", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const orders = pgTable("orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .references(() => usersTable.id, { onDelete: "restrict" })
+    .notNull(),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const ordersItems = pgTable("orders_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+
+  quantity: integer("quantity").notNull(),
+
+  orderId: uuid("order_id")
+    .references(() => orders.id, { onDelete: "cascade" })
+    .notNull(),
+
+  productId: uuid("product_id")
+    .references(() => products.id, { onDelete: "restrict" })
+    .notNull(),
+
+  status: orderStatusEnum().notNull().default("processing"),
+  price: integer("price").notNull(),
+
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
