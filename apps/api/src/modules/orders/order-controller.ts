@@ -11,6 +11,7 @@ export const handleCreateOrder: RequestHandler = async (req, res) => {
     body: { items },
   } = req as CreateOrderBody;
   const userId = req.user?.id;
+  const key = req.headers["idempotency-key"] as string;
   if (!userId)
     throw new ApiError(
       500,
@@ -18,6 +19,6 @@ export const handleCreateOrder: RequestHandler = async (req, res) => {
       "req.user.id is not added by the authenticate token middleware",
     );
 
-  const result = await createOrder(items, userId);
+  const result = await createOrder(items, userId, key);
   res.status(200).json(result);
 };
