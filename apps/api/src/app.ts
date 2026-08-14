@@ -3,7 +3,6 @@ import morgan from "morgan";
 import cors from "cors";
 import CookieParser from "cookie-parser";
 import { handleGlobalError } from "./middleware/global-error";
-import { ApiError } from "./utils/ApiError";
 import { handle404 } from "./middleware/not-found-handler";
 import { v1Routes } from "./routes/v1";
 

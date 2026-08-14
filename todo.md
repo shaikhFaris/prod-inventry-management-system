@@ -6,3 +6,4 @@
 [ ] connect db function before server starts
 [ ] Write proper cors config
 [ ] Need to add proper rate limitng
+[ ] start redis and db before starting server

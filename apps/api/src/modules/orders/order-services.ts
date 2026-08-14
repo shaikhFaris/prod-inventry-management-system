@@ -8,6 +8,8 @@ import {
 import { insertOrder, insertOrderItem } from "./order-repository";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
 import type { EmptyRelations } from "drizzle-orm";
+import { redis } from "../../redis";
+import logger from "../../utils/logger";
 
 type Item = {
   productId: string;
@@ -25,8 +27,8 @@ type CreateOrder =
     };
 
 // also need to make this idempotnet for retries
-export const createOrder = async (items: Item[], userId: string) => {
-  return await db.transaction(async (tx) => {
+export const createOrder = async (items: Item[], userId: string, key: string) => {
+  const result = await db.transaction(async (tx) => {
     const order = (await insertOrder(userId, tx))[0];
     if (!order) throw new ApiError(500, `Order could not be created`);
 
@@ -40,6 +42,14 @@ export const createOrder = async (items: Item[], userId: string) => {
       throw new ApiError(409, "Order could not be placed because all items failed.");
     return orderItems;
   });
+  try {
+    // if this fails, then idempotency fails as well. in prod I would have logged this LOUDER
+    await redis.set(`idempotency:orders:${key}`, JSON.stringify(result), "EX", 60, "NX");
+  } catch (error) {
+    logger.error(error);
+  } finally {
+    return result;
+  }
 };
 
 export const addItemsToOrder = async (
