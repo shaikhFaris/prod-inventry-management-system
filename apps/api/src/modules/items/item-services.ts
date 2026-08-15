@@ -4,7 +4,11 @@ import {
   findProductByIdLock,
   updateProductStockById,
 } from "../products/product-repository";
-import { getItemByIdForUserLocked, updateItemStockById } from "./item-repository";
+import {
+  deleteItemById,
+  getItemByIdForUserLocked,
+  updateItemStockById,
+} from "./item-repository";
 
 export const updateItem = async (
   userId: string,
@@ -30,6 +34,7 @@ export const updateItem = async (
     adjustment = adjustment * -1;
     const productId = item.item.productId;
     // update the product stock also
+    // the product selet must be locked to prevent another race condition
     const product = await findProductByIdLock(productId, tx);
 
     if (!product) throw new ApiError(404, "Product not found");
@@ -43,5 +48,28 @@ export const updateItem = async (
     await updateProductStockById(productId, updatedStock, tx);
 
     return await updateItemStockById(itemmId, updatedItemStock, tx);
+  });
+};
+
+export const deleteItem = async (userId: string, itemId: string, orderId: string) => {
+  return await db.transaction(async (tx) => {
+    const item = await getItemByIdForUserLocked(userId, itemId, orderId, tx);
+    if (!item) throw new ApiError(404, "Item not found for user");
+
+    const productId = item.item.productId;
+    const product = await findProductByIdLock(productId, tx);
+
+    if (!product) throw new ApiError(404, "Product not found");
+
+    const stock = product.stock;
+    const updatedStock = stock + item.item.quantity;
+
+    if (updatedStock < 0)
+      throw new ApiError(409, `Adjustment not possible. Stock: ${stock}`);
+
+    const deletedItem = await deleteItemById(itemId, tx);
+    await updateProductStockById(productId, updatedStock, tx);
+
+    return deletedItem;
   });
 };

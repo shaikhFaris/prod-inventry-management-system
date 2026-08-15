@@ -42,3 +42,10 @@ export const updateItemStockById = async (
     .where(eq(ordersItems.id, itemId))
     .returning();
 };
+
+export const deleteItemById = async (
+  itemId: string,
+  tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  return await tx.delete(ordersItems).where(eq(ordersItems.id, itemId)).returning();
+};
