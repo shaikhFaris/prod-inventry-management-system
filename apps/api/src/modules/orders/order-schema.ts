@@ -10,3 +10,8 @@ export const createOrderSchema = z.object({
     items: z.array(orderItemSchema).min(1, "At least one order item is required"),
   }),
 });
+
+export const getAllOrdersParamsSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(10),
+});

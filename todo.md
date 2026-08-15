@@ -7,3 +7,4 @@
 [ ] Write proper cors config
 [ ] Need to add proper rate limitng
 [ ] start redis and db before starting server
+[ ] implement caching using the nest way to do so

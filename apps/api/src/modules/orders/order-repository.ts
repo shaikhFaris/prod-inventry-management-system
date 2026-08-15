@@ -1,4 +1,4 @@
-import type { EmptyRelations } from "drizzle-orm";
+import { desc, eq, inArray, type EmptyRelations } from "drizzle-orm";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
 import { db } from "../../db/drizzle";
@@ -31,4 +31,22 @@ export const insertOrderItem = async (
     price,
     quantity,
   });
+};
+
+export const getAllOrders = async (userId: string, limit: number, page: number) => {
+  console.log(limit);
+  return await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(eq(orders.userId, userId))
+    .orderBy(desc(orders.createdAt))
+    .limit(limit)
+    .offset((page - 1) * limit);
+};
+
+export const getItemsForOrder = async (orderIds: string[]) => {
+  return await db
+    .select()
+    .from(ordersItems)
+    .where(inArray(ordersItems.orderId, orderIds));
 };
