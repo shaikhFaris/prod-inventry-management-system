@@ -5,7 +5,13 @@ import {
   findProductByIdLock,
   updateProductStockById,
 } from "../products/product-repository";
-import { insertOrder, insertOrderItem } from "./order-repository";
+import {
+  getAllOrders,
+  getItemsForOrder,
+  getOrderDetails,
+  insertOrder,
+  insertOrderItem,
+} from "./order-repository";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
 import type { EmptyRelations } from "drizzle-orm";
 import { redis } from "../../redis";
@@ -86,4 +92,23 @@ export const addItemsToOrder = async (
       errorMsg: "Couldnt add this item.",
     };
   }
+};
+
+export const getOrders = async (userId: string, limit: number, page: number) => {
+  const orders = await getAllOrders(userId, limit, page);
+  if (orders.length === 0) return [];
+
+  const orderIds: string[] = orders.map((el) => el.id);
+  return await getItemsForOrder(orderIds);
+};
+
+export const getOrderDetail = async (userId: string, orderId: string) => {
+  const order = await getOrderDetails(userId, orderId);
+  if (!order) throw new ApiError(404, "Order does not exist");
+
+  const items = await getItemsForOrder([order.id]);
+  return {
+    ...order,
+    items,
+  };
 };
