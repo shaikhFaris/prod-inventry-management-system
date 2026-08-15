@@ -8,6 +8,7 @@ import {
 import {
   getAllOrders,
   getItemsForOrder,
+  getOrderDetails,
   insertOrder,
   insertOrderItem,
 } from "./order-repository";
@@ -99,4 +100,15 @@ export const getOrders = async (userId: string, limit: number, page: number) => 
 
   const orderIds: string[] = orders.map((el) => el.id);
   return await getItemsForOrder(orderIds);
+};
+
+export const getOrderDetail = async (userId: string, orderId: string) => {
+  const order = await getOrderDetails(userId, orderId);
+  if (!order) throw new ApiError(404, "Order does not exist");
+
+  const items = await getItemsForOrder([order.id]);
+  return {
+    ...order,
+    items,
+  };
 };
