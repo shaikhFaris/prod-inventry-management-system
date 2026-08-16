@@ -1,0 +1,1 @@
+ALTER TABLE "orders" ADD COLUMN "status" "status" DEFAULT 'processing'::"status" NOT NULL;

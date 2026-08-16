@@ -1,7 +1,6 @@
 import { and, eq, type EmptyRelations } from "drizzle-orm";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
-import { db } from "../../db/drizzle";
 import { orders, ordersItems } from "../../db/schema/schema";
 
 export const getItemByIdForUserLocked = async (

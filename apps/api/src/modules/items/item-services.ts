@@ -1,6 +1,11 @@
 import { db } from "../../db/drizzle";
 import { ApiError } from "../../utils/ApiError";
 import {
+  getItemsForOrder,
+  getOrderDetails,
+  updateOrderStatus,
+} from "../orders/order-repository";
+import {
   findProductByIdLock,
   updateProductStockById,
 } from "../products/product-repository";
@@ -70,6 +75,23 @@ export const deleteItem = async (userId: string, itemId: string, orderId: string
     const deletedItem = await deleteItemById(itemId, tx);
     await updateProductStockById(productId, updatedStock, tx);
 
+    // update order status to "concelled" if there are no items
+
+    // first, lock the order row so that another concurrent req cant access items in a order while checking all items
+    const order = await getOrderDetails(userId, orderId, tx);
+
+    if (!order)
+      throw new ApiError(
+        404,
+        `Order not found.`,
+        "THis is a wierd error in delete item where the order is not found",
+      );
+
+    // now that order is locked it is safe to check all items in the order without locking them
+    const allItems = await getItemsForOrder([order.id]);
+
+    // update order to cancelled
+    if (allItems.length === 0) await updateOrderStatus("cancelled", tx);
     return deletedItem;
   });
 };

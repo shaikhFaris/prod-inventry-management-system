@@ -54,6 +54,8 @@ export const orders = pgTable("orders", {
     .references(() => usersTable.id, { onDelete: "restrict" })
     .notNull(),
 
+  status: orderStatusEnum().notNull().default("processing"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
