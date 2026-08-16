@@ -1,8 +1,7 @@
 import { and, eq, type EmptyRelations } from "drizzle-orm";
 import type { NodePgQueryResultHKT } from "drizzle-orm/node-postgres";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
-import { db } from "../../db/drizzle";
-import { orders, ordersItems } from "../../db/schema/schema";
+import { orders, ordersItems, orderStatusEnum } from "../../db/schema/schema";
 
 export const getItemByIdForUserLocked = async (
   userId: string,
@@ -43,9 +42,46 @@ export const updateItemStockById = async (
     .returning();
 };
 
+type ItemStatus = (typeof orderStatusEnum.enumValues)[number];
+
+export const updateItemStatusById = async (
+  itemId: string,
+  status: ItemStatus,
+  tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  return await tx
+    .update(ordersItems)
+    .set({
+      status: status,
+      updatedAt: new Date(),
+    })
+    .where(eq(ordersItems.id, itemId))
+    .returning();
+};
+
 export const deleteItemById = async (
   itemId: string,
   tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
 ) => {
-  return await tx.delete(ordersItems).where(eq(ordersItems.id, itemId)).returning();
+  return await tx
+    .update(ordersItems)
+    .set({
+      status: "cancelled",
+    })
+    .where(eq(ordersItems.id, itemId))
+    .returning();
+};
+
+export const getItemByAgentIdLocked = async (
+  agentId: string,
+  itemId: string,
+  tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  return (
+    await tx
+      .select()
+      .from(ordersItems)
+      .where(and(eq(ordersItems.id, itemId), eq(ordersItems.agentId, agentId)))
+      .for("update")
+  )[0];
 };

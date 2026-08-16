@@ -26,11 +26,13 @@ export const findUserByEmail = async (
 export const findUserByRefreshToken = async (
   tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
   refreshToken: string,
+  userId: string,
 ) => {
   const user = await tx
     .select()
     .from(usersTable)
-    .innerJoin(refreshTokenTable, eq(refreshTokenTable.token, refreshToken));
+    .innerJoin(refreshTokenTable, eq(refreshTokenTable.token, refreshToken))
+    .where(eq(usersTable.id, userId));
   return user[0]?.users;
 };
 

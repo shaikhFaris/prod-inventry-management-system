@@ -9,7 +9,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum("role", ["admin", "customer"]);
+export const roleEnum = pgEnum("role", ["admin", "customer", "agent"]);
 
 export const orderStatusEnum = pgEnum("status", ["processing", "delivered", "cancelled"]);
 
@@ -54,6 +54,8 @@ export const orders = pgTable("orders", {
     .references(() => usersTable.id, { onDelete: "restrict" })
     .notNull(),
 
+  status: orderStatusEnum().notNull().default("processing"),
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -73,6 +75,9 @@ export const ordersItems = pgTable("orders_items", {
 
   status: orderStatusEnum().notNull().default("processing"),
   price: integer("price").notNull(),
+
+  // only one delivery agent in the company
+  agentId: uuid("agent_id").default("6ffabd06-3f15-4b1d-9be9-86d787e96e4c"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

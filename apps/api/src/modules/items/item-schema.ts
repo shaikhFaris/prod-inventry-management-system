@@ -12,3 +12,10 @@ export const deleteItemSchema = z.object({
     orderId: z.uuid(),
   }),
 });
+
+export const updateItemByAgentSchema = z.object({
+  body: z.strictObject({
+    orderId: z.uuid(),
+    userId: z.uuid(),
+  }),
+});
