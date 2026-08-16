@@ -56,7 +56,6 @@ export const logIn = async (email: string, password: string) => {
       env.JWT_REFRESH_TOKEN_SECRET,
       env.JWT_REFRESH_TOKEN_TIME_IN_MS,
     );
-
     // store/update refresh token in db
     await insertOrUpdateRefreshToken(tx, refreshToken, user.id);
     const accountInfo = {
@@ -81,11 +80,10 @@ export const refresh = async (refreshToken: string) => {
 
     // if refresh tokens are valid
     return db.transaction(async (tx) => {
-      const user = await findUserByRefreshToken(tx, refreshToken);
+      const user = await findUserByRefreshToken(tx, refreshToken, decodedRefreshToken.id);
 
       // user not found
       if (!user) throw new ApiError(401, "Refresh key not found.");
-
       const accessToken = await generateToken(
         {
           id: user.id,

@@ -1,0 +1,1 @@
+ALTER TABLE "orders_items" ADD COLUMN "agent_id" uuid DEFAULT '1a44eeed-9fc5-4ff0-9bfe-f954d50006e3';

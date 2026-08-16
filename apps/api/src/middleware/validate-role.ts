@@ -7,6 +7,7 @@ export const authenticateRole =
   (req, res, next) => {
     const reqRole = req.user?.role;
     if (!role) throw new ApiError(500, "role not found");
+    console.log(role, reqRole);
     if (role !== reqRole) throw new ApiError(403, "Access denied.");
     next();
   };

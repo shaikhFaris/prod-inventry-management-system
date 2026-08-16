@@ -59,8 +59,27 @@ export const getOrderDetails = async (
   )[0];
 };
 
-export const getItemsForOrder = async (orderIds: string[]) => {
-  return await db
+export const getOrderDetailsLocked = async (
+  userId: string,
+  orderId: string,
+  tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  return (
+    await tx
+      .select()
+      .from(orders)
+      .where(and(eq(orders.userId, userId), eq(orders.id, orderId)))
+      .for("update")
+  )[0];
+};
+
+export const getItemsForOrder = async (
+  orderIds: string[],
+  tx?: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
+) => {
+  const pool = tx ?? db;
+
+  return await pool
     .select()
     .from(ordersItems)
     .where(inArray(ordersItems.orderId, orderIds));
@@ -70,10 +89,15 @@ type OrderStatus = (typeof orderStatusEnum.enumValues)[number];
 
 export const updateOrderStatus = async (
   status: OrderStatus,
+  orderId: string,
   tx: PgAsyncTransaction<NodePgQueryResultHKT, EmptyRelations>,
 ) => {
-  return await tx.update(orders).set({
-    status,
-    updatedAt: new Date(),
-  });
+  return await tx
+    .update(orders)
+    .set({
+      status,
+      updatedAt: new Date(),
+    })
+    .where(eq(orders.id, orderId))
+    .returning();
 };

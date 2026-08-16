@@ -7,7 +7,13 @@ const orderItemSchema = z.strictObject({
 
 export const createOrderSchema = z.object({
   body: z.strictObject({
-    items: z.array(orderItemSchema).min(1, "At least one order item is required"),
+    items: z
+      .array(orderItemSchema)
+      .min(1, "At least one order item is required")
+      .refine(
+        (items) => new Set(items.map((item) => item.productId)).size === items.length,
+        "Duplicate products are not allowed",
+      ),
   }),
 });
 

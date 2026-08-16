@@ -9,13 +9,16 @@ import {
   getAllOrders,
   getItemsForOrder,
   getOrderDetails,
+  getOrderDetailsLocked,
   insertOrder,
   insertOrderItem,
+  updateOrderStatus,
 } from "./order-repository";
 import type { PgAsyncTransaction } from "drizzle-orm/pg-core";
 import type { EmptyRelations } from "drizzle-orm";
 import { redis } from "../../redis";
 import logger from "../../utils/logger";
+import { deleteItemById } from "../items/item-repository";
 
 type Item = {
   productId: string;
@@ -104,11 +107,36 @@ export const getOrders = async (userId: string, limit: number, page: number) => 
 
 export const getOrderDetail = async (userId: string, orderId: string) => {
   const order = await getOrderDetails(userId, orderId);
-  if (!order) throw new ApiError(404, "Order does not exist");
+  if (!order) throw new ApiError(404, "Order does not exist for user");
 
   const items = await getItemsForOrder([order.id]);
   return {
     ...order,
     items,
   };
+};
+
+export const cancellOrder = async (userId: string, orderId: string) => {
+  return await db.transaction(async (tx) => {
+    // this is locked to prevent race conditions as all other update or delete item req depends on order table, If it is locked in this transaction, we can make sure it is not updated in between
+    const order = await getOrderDetailsLocked(userId, orderId, tx);
+    if (!order) throw new ApiError(404, "Order does not exist");
+
+    const items = await getItemsForOrder([order.id], tx);
+
+    // cancell all items step by step with await because if you do parelley, transaction doesnt work
+    for (const item of items) {
+      const productId = item.productId;
+      const product = await findProductByIdLock(productId, tx);
+
+      if (!product) throw new ApiError(404, "Product not found");
+
+      const stock = product.stock;
+      const updatedStock = stock + item.quantity;
+
+      await deleteItemById(item.id, tx);
+      await updateProductStockById(productId, updatedStock, tx);
+    }
+    return await updateOrderStatus("cancelled", order.id, tx);
+  });
 };
